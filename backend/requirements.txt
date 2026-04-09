@@ -1,0 +1,6 @@
+flask
+flask-cors
+opencv-python
+numpy
+tensorflow==2.15.0
+requests

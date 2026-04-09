@@ -1,0 +1,26 @@
+<!DOCTYPE html>
+<html>
+<head>
+<link rel="stylesheet" href="style.css">
+</head>
+
+<body class="dashboard">
+
+<h1>Drowsiness Detection</h1>
+
+<video id="video" width="400" autoplay></video><br><br>
+
+<button onclick="startDetection()">Start</button>
+<button onclick="testAlarm()">Test Alarm</button>
+
+<h2 id="result">Waiting...</h2>
+
+<!-- Sounds -->
+<audio id="alarm" src="assets/sounds/alarm.wav"></audio>
+<audio id="wakeup" src="assets/sounds/wakeup.mp3"></audio>
+<audio id="safe" src="assets/sounds/safe.mp3"></audio>
+
+<script src="script.js"></script>
+
+</body>
+</html>
