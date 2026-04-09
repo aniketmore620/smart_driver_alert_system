@@ -1,5 +1,4 @@
-```python
-from flask import Flask, request, jsonify
+from flask import Flask, request, jsonify, send_from_directory
 from flask_cors import CORS
 
 import cv2
@@ -10,34 +9,31 @@ from email.message import EmailMessage
 from tensorflow.keras.models import load_model
 import time
 import requests
-import os   # ✅ NEW
+import os
 
-app = Flask(__name__)
+# Flask setup
+app = Flask(__name__, static_folder="../frontend/assets")
 CORS(app)
 
-# ---------- MODEL (S3 DOWNLOAD) ----------
+# ---------- MODEL ----------
 MODEL_PATH = "model.h5"
-MODEL_URL = "https://your-bucket-name.s3.amazonaws.com/model.h5"  # 🔴 CHANGE THIS
+MODEL_URL = "https://your-bucket-name.s3.amazonaws.com/model.h5"  # 🔴 UPDATE THIS
 
 def download_model():
-    print("Downloading model from S3...")
     try:
+        print("Downloading model...")
         r = requests.get(MODEL_URL, timeout=30)
         r.raise_for_status()
-
         with open(MODEL_PATH, "wb") as f:
             f.write(r.content)
-
-        print(f"Model downloaded ✅ ({len(r.content)/1024/1024:.2f} MB)")
+        print("Model downloaded ✅")
     except Exception as e:
         print("Error downloading model:", e)
         raise
 
-# Download only if not exists
 if not os.path.exists(MODEL_PATH):
     download_model()
 
-# Load model
 model = load_model(MODEL_PATH)
 
 # ---------- CASCADE ----------
@@ -66,17 +62,26 @@ def send_email():
 
         msg = EmailMessage()
         msg['Subject'] = "Drowsiness Alert"
-        msg['From'] = "your_email@gmail.com"   # 🔴 CHANGE
-        msg['To'] = "receiver@gmail.com"       # 🔴 CHANGE
+        msg['From'] = "your_email@gmail.com"   # 🔴 UPDATE
+        msg['To'] = "receiver@gmail.com"       # 🔴 UPDATE
 
         msg.set_content(f"Drowsiness detected!\nLocation: {loc['lat']},{loc['lon']}")
 
         with smtplib.SMTP_SSL('smtp.gmail.com', 465) as smtp:
-            smtp.login("your_email@gmail.com", "your_app_password")  # 🔴 CHANGE
+            smtp.login("your_email@gmail.com", "your_app_password")  # 🔴 UPDATE
             smtp.send_message(msg)
 
     except Exception as e:
         print("Email error:", e)
+
+# ---------- FRONTEND ROUTES ----------
+@app.route("/")
+def serve_login():
+    return send_from_directory("../frontend/assets", "login.html")
+
+@app.route("/<path:path>")
+def serve_static(path):
+    return send_from_directory("../frontend/assets", path)
 
 # ---------- AUTH ----------
 @app.route('/register', methods=['POST'])
@@ -85,15 +90,12 @@ def register():
 
     conn = sqlite3.connect("users.db")
     c = conn.cursor()
-
     c.execute("INSERT INTO users VALUES (?,?)",
               (data['username'], data['password']))
-
     conn.commit()
     conn.close()
 
     return jsonify({"msg": "Registered"})
-
 
 @app.route('/login', methods=['POST'])
 def login():
@@ -101,7 +103,6 @@ def login():
 
     conn = sqlite3.connect("users.db")
     c = conn.cursor()
-
     c.execute("SELECT * FROM users WHERE username=? AND password=?",
               (data['username'], data['password']))
 
@@ -110,16 +111,15 @@ def login():
 
     return jsonify({"msg": "success" if user else "fail"})
 
-# ---------- MODEL ----------
+# ---------- MODEL FUNCTIONS ----------
 def predict_eye(img):
-    img = cv2.resize(img, (24,24))
+    img = cv2.resize(img, (24, 24))
     img = img / 255.0
-    img = img.reshape(1,24,24,1)
+    img = img.reshape(1, 24, 24, 1)
 
     pred = model.predict(img)
     return np.argmax(pred)
 
-# ---------- YAWN ----------
 def detect_yawn(frame, x, y, w, h):
     global yawn_start
 
@@ -142,7 +142,7 @@ def detect_yawn(frame, x, y, w, h):
 
     return False
 
-# ---------- MAIN ----------
+# ---------- MAIN PREDICT ----------
 @app.route('/predict', methods=['POST'])
 def predict():
     global score
@@ -193,12 +193,6 @@ def predict():
         "yawn": yawn_flag
     })
 
-# ---------- HOME ----------
-@app.route('/')
-def home():
-    return "Backend running successfully 🚀"
-
 # ---------- RUN ----------
 if __name__ == "__main__":
     app.run(host="0.0.0.0", port=5000)
-```
