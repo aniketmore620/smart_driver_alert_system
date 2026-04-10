@@ -17,23 +17,30 @@ CORS(app)
 
 # ---------- MODEL ----------
 MODEL_PATH = "model.h5"
-MODEL_URL = "https://your-bucket-name.s3.amazonaws.com/model.h5"  # 🔴 UPDATE THIS
+
+# ✅ YOUR S3 URL (FIXED)
+MODEL_URL = "https://model-drowsiness.s3.us-east-1.amazonaws.com/model.h5"
 
 def download_model():
     try:
-        print("Downloading model...")
+        print("Downloading model from S3...")
         r = requests.get(MODEL_URL, timeout=30)
         r.raise_for_status()
+
         with open(MODEL_PATH, "wb") as f:
             f.write(r.content)
-        print("Model downloaded ✅")
-    except Exception as e:
-        print("Error downloading model:", e)
-        raise
 
+        print("Model downloaded ✅")
+
+    except Exception as e:
+        print("❌ Error downloading model:", e)
+        exit(1)   # ✅ stop container if model fails
+
+# Download only if not exists
 if not os.path.exists(MODEL_PATH):
     download_model()
 
+# Load model
 model = load_model(MODEL_PATH)
 
 # ---------- CASCADE ----------
