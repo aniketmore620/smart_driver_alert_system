@@ -3,13 +3,11 @@ from flask_cors import CORS
 import cv2
 import numpy as np
 import sqlite3
-import smtplib
-from email.message import EmailMessage
 from tensorflow.keras.models import load_model
-import time
 import requests
 import os
 
+# ✅ Flask config (correct)
 app = Flask(__name__, static_folder="frontend", static_url_path="")
 CORS(app)
 
