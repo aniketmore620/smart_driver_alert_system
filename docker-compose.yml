@@ -2,8 +2,14 @@ version: '3.8'
 
 services:
   backend:
-    build: ./backend
-    container_name: backend
+    build:
+      context: ./backend
+      dockerfile: Dockerfile
+    container_name: smart-driver-backend
     ports:
       - "5000:5000"
     restart: always
+    volumes:
+      - ./backend:/app
+    environment:
+      - PYTHONUNBUFFERED=1
