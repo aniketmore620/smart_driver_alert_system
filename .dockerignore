@@ -1,9 +1,34 @@
+# Python
 venv/
 __pycache__/
 *.pyc
 *.pyo
 *.pyd
+
+# Database (optional - see note below)
 *.db
+
+# Git
 .git
 .gitignore
+
+# Node (if any frontend tooling used)
 node_modules/
+
+# OS files
+.DS_Store
+Thumbs.db
+
+# Logs
+*.log
+
+# Docker
+Dockerfile
+docker-compose.yml
+
+# IDE files
+.vscode/
+.idea/
+
+# Cache
+*.cache
