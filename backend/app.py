@@ -1,6 +1,5 @@
 from flask import Flask, request, jsonify, send_from_directory
 from flask_cors import CORS
-
 import cv2
 import numpy as np
 import sqlite3
@@ -11,8 +10,7 @@ import time
 import requests
 import os
 
-# ✅ FIXED PATH FOR DOCKER
-app = Flask(__name__, static_folder="/frontend")
+app = Flask(__name__, static_folder="frontend", static_url_path="")
 CORS(app)
 
 # ---------- MODEL ----------
@@ -49,19 +47,14 @@ def init_db():
 
 init_db()
 
-# ---------- HEALTH ----------
+# ---------- FRONTEND ----------
 @app.route("/")
 def home():
-    return "Backend Running ✅"
-
-# ---------- FRONTEND ----------
-@app.route("/app")
-def serve_login():
-    return send_from_directory("/frontend", "login.html")
+    return send_from_directory(app.static_folder, "login.html")
 
 @app.route("/<path:path>")
 def serve_static(path):
-    return send_from_directory("/frontend", path)
+    return send_from_directory(app.static_folder, path)
 
 # ---------- AUTH ----------
 @app.route('/register', methods=['POST'])
