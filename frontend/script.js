@@ -1,4 +1,4 @@
-const API = "http://127.0.0.1:5000";
+const API = "";  // ✅ IMPORTANT FIX (no localhost)
 
 // ---------- GLOBAL STATE ----------
 let lastState = "normal";
@@ -19,10 +19,14 @@ function login() {
     .then(res => res.json())
     .then(data => {
         if (data.msg === "success") {
-            window.location = "dashboard.html";
+            window.location.href = "dashboard.html";  // ✅ FIX
         } else {
             alert("Login failed");
         }
+    })
+    .catch(err => {
+        console.error(err);
+        alert("Server error");
     });
 }
 
@@ -39,12 +43,16 @@ function register() {
     .then(res => res.json())
     .then(data => {
         alert(data.msg);
-        window.location = "login.html";
+        window.location.href = "login.html";
+    })
+    .catch(err => {
+        console.error(err);
+        alert("Error");
     });
 }
 
 function goRegister() {
-    window.location = "register.html";
+    window.location.href = "register.html";
 }
 
 // ---------- CAMERA ----------
@@ -87,9 +95,8 @@ function startDetection() {
                 document.getElementById("result").innerText =
                     `Status: ${data.result} | Score: ${data.score} | Yawn: ${data.yawn}`;
 
-                let isDrowsy = (data.score >= 3 || data.yawn); // 🔥 LOWERED THRESHOLD
+                let isDrowsy = (data.score >= 3 || data.yawn);
 
-                // ---------- SMOOTHING ----------
                 if (isDrowsy) {
                     drowsyFrames++;
                     normalFrames = 0;
@@ -98,9 +105,7 @@ function startDetection() {
                     drowsyFrames = 0;
                 }
 
-                // ---------- TRIGGER DROWSY ----------
-                if (drowsyFrames >= 2 && !alarmCooldown) {  // 🔥 REDUCED
-
+                if (drowsyFrames >= 2 && !alarmCooldown) {
                     if (lastState !== "drowsy") {
                         document.getElementById("alarm").play();
                         document.getElementById("wakeup").play();
@@ -110,13 +115,11 @@ function startDetection() {
 
                         setTimeout(() => {
                             alarmCooldown = false;
-                        }, 4000); // 🔥 shorter cooldown
+                        }, 4000);
                     }
                 }
 
-                // ---------- BACK TO NORMAL ----------
-                if (normalFrames >= 3) {  // 🔥 REDUCED
-
+                if (normalFrames >= 3) {
                     if (lastState === "drowsy") {
                         document.getElementById("safe").play();
                         lastState = "normal";
