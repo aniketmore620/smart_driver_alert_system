@@ -11,14 +11,15 @@ RUN apt-get update && apt-get install -y \
     libxrender1 \
     && rm -rf /var/lib/apt/lists/*
 
-# ✅ COPY BACKEND
+# ✅ Install Python dependencies FIRST (cache optimization)
+COPY backend/requirements.txt .
+RUN pip install --no-cache-dir -r requirements.txt
+
+# ✅ Copy backend code
 COPY backend/ .
 
-# ✅ COPY FRONTEND (IMPORTANT FIX)
-COPY frontend/ /frontend
-
-# Install Python dependencies
-RUN pip install --no-cache-dir -r requirements.txt
+# ✅ Copy frontend correctly (IMPORTANT FIX)
+COPY frontend/ ./frontend
 
 EXPOSE 5000
 
